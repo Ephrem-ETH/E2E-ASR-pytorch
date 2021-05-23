@@ -52,11 +52,13 @@ python eval.py <path to best model> [--ctc] --bi
 ```
 
 ## Results
+|model|beam width | CER(%)| WER(%)|
+|-----|:---------:|:---:|:----|
+|CTC  |1 | 29.30 |35.71|
+|CTC | 3| 30.86| 34.86|
+|CTC |10 | 31.05|34.66|
+|CTC|15| 32.00| 34.44|
 
-| Model | CER| | WER |
-| --- |---| --- |
-| CTC-beam 1 |29 | 35.71 |
-| CTC-beam 2 | | 20.59 |
 
 ## Requirements
 * Python 3.6
