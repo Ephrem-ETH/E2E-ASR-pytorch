@@ -1,5 +1,9 @@
 # E2E ASR experiments on Librispeech 
-This experiment is done on 100 hours of librispeech data for the task of E2E ASR using an intermediate character level representation and Connectionist Temporal Classifications(CTC) loss function by transforming the coorsponding transcription each utterance of both training and development set from sequence of words to sequence of characters by adding additional character(">") at the end of each word in the transcription file. We used a CTC beam search decoder to reverse back the sequence of characters to word. Statistical language model is also used for scoring the beams to improve performace of the beam search decoder.
+This experiment is conducted on 100 hours of librispeech data for the task of E2E ASR using an intermediate character level representation and Connectionist Temporal Classifications(CTC) loss function.
+
+Transforming transcription of both train and dev set from sequence of words to sequence of characters by adding additional character(">") at the end of each word of the transcription is required to train the CTC model on character level.  
+
+We used a beam search decoding strategy to decode the model output and return word transcription. 
 
 
 
@@ -17,14 +21,14 @@ This experiment is done on 100 hours of librispeech data for the task of E2E ASR
 
 
 # Prepare Data
- * All the following python programs to prepare the training data are found in utils folder
+ * The following python programs  found in the above utils folder 
 ### Step 1
-Prepare custom lexicon file that maps word to sequence of characters
+Prepare custom lexicon file that maps word to a sequence of characters
 ```
 python word_to_characters.py --path [path-to-your-original-lexicon-file]
 ```
 ### Step 2
-Transform the word transcription to sequence of charcters by adding ">" the end of each word
+Transform the word transcription to  a sequence of characters by adding ">" at the end of each word
 #### Example
  * THE SUNDAY SCHOOL  => T H E > S U N D A Y > S C H O O L >
 ```
@@ -32,7 +36,7 @@ python prepare_target.py --path [path-of-your-traget-file]
 ```
 
 ### Step 3
-Reterive unique characters from the lexicon
+Retrieve unique characters from the lexicon
 ```
 python prepare.phone.py --path [path-to-your-original-lexicon-file]
 ```
@@ -49,7 +53,7 @@ python train_ctc.py --lr 1e-3 --bi --dropout 0.5 --out exp/ctc_bi_lr1e-3 --sched
 ```
 ##### Results
 ###### Loss curve
-<img src="img/loss1.png"/>
+<img src="img/loss.png"/>
 
 
 ### Decode 
@@ -64,7 +68,7 @@ python eval.py <path to best model> [--ctc] --bi
 |CTC  |1 | 30.47 |35.71|
 |CTC | 3| 29.65| 34.86|
 |CTC |10 | 31.05|34.66|
-|CTC|15| 32.00| 34.44|
+
 
 
 ## Requirements
@@ -76,5 +80,5 @@ python eval.py <path to best model> [--ctc] --bi
 ## Reference
 * RNN Transducer (Graves 2012): [Sequence Transduction with Recurrent Neural Networks](https://arxiv.org/abs/1211.3711)
 * RNNT joint (Graves 2013): [Speech Recognition with Deep Recurrent Neural Networks](https://arxiv.org/abs/1303.5778 )
-* (PyTorch End-to-End Models for ASR)[https://github.com/awni/speech]
-* (A Fast Sequence Transducer GPU Implementation with PyTorch Bindings)[https://github.com/HawkAaron/warp-transducer/tree/add_network_accelerate]
+* (E2E-ASR)[https://github.com/HawkAaron/E2E-ASR]
+* (CTC Networks and Language Models: Prefix Beam Search Explained)[https://medium.com/corti-ai/ctc-networks-and-language-models-prefix-beam-search-explained-c11d1ee23306]
