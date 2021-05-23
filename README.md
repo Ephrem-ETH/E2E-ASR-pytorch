@@ -1,4 +1,8 @@
-# Graves 2013 experiments
+# E2E ASR using An intermediate character level representations and graves 2013 experiments on Librispeech 
+This experiment is done on 100 hours of librispeech data for the task of E2E ASR using an intermediate character representation and Connectionist Temporal Classifications(CTC) loss by transforming the target file of both training and development set from sequence of words to sequence of characters by adding additional character(i.e. >) at the end of each word in the transcription file. We used a CTC beam search decoder to reverse back the Sequence of characters to word. We also included a statistical language model to improve the  ctc beam search decoder.
+
+
+
 ## File description
 * model.py: rnnt joint model
 * model2012.py: graves2012 model
@@ -7,9 +11,28 @@
 * eval.py: rnnt & ctc decode
 * DataLoader.py: kaldi feature loader
 
+
+
+# Prepare Data
+### Step 1
+Prepare custom lexicon file that maps word to sequence of characters
+```
+python word_to_characters.py --path [path-to-your-original-lexicon-file]
+```
+### Step 2
+Transform the word transcription to sequence of charcters by adding ">" the end of each word
+```
+python prepare_target.py --path [path-of-your-traget-file]
+```
+### Step 3
+Reterive unique characters from the lexicon
+```
+python prepare.phone.py --path [path-to-your-original-lexicon-file]
+```
+
 ## Run
 * Extract feature
-link kaldi timit example dirs (`local` `steps` `utils` )
+link kaldi librispeech example dirs (`local` `steps` `utils` )
 excute `run.sh` to extract 40 dim fbank feature
 run `feature_transform.sh` to get 123 dim feature as described in Graves2013
 
@@ -30,10 +53,10 @@ python eval.py <path to best model> [--ctc] --bi
 
 ## Results
 
-| Model | PER |
-| --- | --- |
-| CTC | 21.38 |
-| RNN-T | 20.59 |
+| Model | CER| | WER |
+| --- |---| --- |
+| CTC-beam 1 |29 | 35.71 |
+| CTC-beam 2 | | 20.59 |
 
 ## Requirements
 * Python 3.6
