@@ -1,0 +1,15 @@
+/__pycache__
+/amharic_lexicon.txt
+/conf
+/libri_decode
+/libri_decode1_w_3
+/libri_decode_Lev
+/libri_decode_Lev1
+/libri_exp3
+/mydata
+/run.sh
+/seq2seq
+/test
+/test_lev
+/test_lev1
+/train_att.py
