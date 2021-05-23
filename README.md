@@ -1,5 +1,6 @@
-# E2E ASR using An intermediate character level representations and graves 2013 experiments on Librispeech 
-This experiment is done on 100 hours of librispeech data for the task of E2E ASR using an intermediate character representation and Connectionist Temporal Classifications(CTC) loss by transforming the target file of both training and development set from sequence of words to sequence of characters by adding additional character(i.e. >) at the end of each word in the transcription file. We used a CTC beam search decoder to reverse back the Sequence of characters to word. We also included a statistical language model to improve the  ctc beam search decoder.
+# E2E ASR experiments on Librispeech 
+This experiment is done on 100 hours of librispeech data for the task of E2E ASR using an intermediate character level representation and Connectionist Temporal Classifications(CTC) loss function by transforming the coorsponding transcription each utterance of both training and development set from sequence of words to sequence of characters by adding additional character(">") at the end of each word in the transcription file. We used a CTC beam search decoder to reverse back the sequence of characters to word. Statistical language model is also used for scoring the beams to improve performace of the beam search decoder.
+
 
 
 
@@ -13,7 +14,10 @@ This experiment is done on 100 hours of librispeech data for the task of E2E ASR
 
 
 
+
+
 # Prepare Data
+ * All the following python programs to prepare the training data are found in utils folder
 ### Step 1
 Prepare custom lexicon file that maps word to sequence of characters
 ```
@@ -21,9 +25,12 @@ python word_to_characters.py --path [path-to-your-original-lexicon-file]
 ```
 ### Step 2
 Transform the word transcription to sequence of charcters by adding ">" the end of each word
+#### Example
+ * THE SUNDAY SCHOOL  => T H E > S U N D A Y > S C H O O L >
 ```
 python prepare_target.py --path [path-of-your-traget-file]
 ```
+
 ### Step 3
 Reterive unique characters from the lexicon
 ```
@@ -33,29 +40,29 @@ python prepare.phone.py --path [path-to-your-original-lexicon-file]
 ## Run
 * Extract feature
 link kaldi librispeech example dirs (`local` `steps` `utils` )
-excute `run.sh` to extract 40 dim fbank feature
-run `feature_transform.sh` to get 123 dim feature as described in Graves2013
+excute `run.sh` to extract 13 dim mfcc feature
+run `feature_transform.sh` to get 39 dim feature 
 
-* Train CTC acoustic model
+### Train CTC acoustic model
 ```
 python train_ctc.py --lr 1e-3 --bi --dropout 0.5 --out exp/ctc_bi_lr1e-3 --schedule
 ```
+##### Results
+###### Loss curve
+<img src="img/loss1.png"/>
 
-* Train RNNT joint model
-```
-python train_rnnt.py --lr 4e-4 --bi --dropout 0.5 --out exp/rnnt_bi_lr4e-4 --schedule
-```
 
-* Decode 
+### Decode 
 ```
 python eval.py <path to best model> [--ctc] --bi
 ```
 
+
 ## Results
 |model|beam width | CER(%)| WER(%)|
 |-----|:---------:|:---:|:----|
-|CTC  |1 | 29.30 |35.71|
-|CTC | 3| 30.86| 34.86|
+|CTC  |1 | 30.47 |35.71|
+|CTC | 3| 29.65| 34.86|
 |CTC |10 | 31.05|34.66|
 |CTC|15| 32.00| 34.44|
 
