@@ -5,7 +5,7 @@ import os
 import time
 
 import editdistance
-import Levenshtein as Lev
+import kaldi_io
 import torch
 from torch.autograd import Variable
 import torch.nn.functional as F
@@ -64,12 +64,19 @@ def distance(y, t, blank=rephone[0]):
     y = remap(y, blank)
     t = remap(t, blank)
     return y, t, editdistance.eval(y, t)
+# calculate sentence level character error rate(CER)
+def calculate_cer(y,t):
+    y = ' '.join(y)
+    t = ' '.join(t)
+    char_t_len = len(t)
+    return char_t_len, editdistance.eval(y, t)
 
+  
 
 model.eval()
 def decode():
     logging.info('Decoding transduction model:')
-    err = cnt = 0
+    total_word, total_char, total_cer, total_wer = 0,0,0,0
     for k, v in kaldi_io.read_mat_ark(feat):
         xs = Variable(torch.FloatTensor(v[None, ...]), volatile=True)
         if use_gpu:
@@ -81,11 +88,14 @@ def decode():
             y, nll = model.greedy_decode(xs)
         y = [pmap.get(i) for i in y if pmap.get(i)]
         t = [pmap.get(i) for i in label[k] if pmap.get(i)]
-        y, t, e = distance(y, t)
-        err += e; cnt += len(t)
+        y, t, wer = distance(y, t)
+        total_wer += wer; total_word += len(t)
+        #Compute CER
+        sen_len, cer = calculate_cer(y,t)
+        total_cer += cer; total_char += sen_len
         logging.info('[{}]: {}'.format(k, ' '.join(t)))
         logging.info('[{}]: {}\nlog-likelihood: {:.2f}\n'.format(k, ' '.join(y),nll))
-    logging.info('{} set {} PER {:.2f}%\n'.format(
-        args.dataset.capitalize(), 'CTC' if args.ctc else 'Transducer', 100*err/cnt))
+    logging.info('{} set {} CER {:.2f}%\t and WER {:.2f}%\n'.format(
+        args.dataset.capitalize(), 'CTC' if args.ctc else 'Transducer', 100*total_cer/total_char,100*total_wer/total_word))
 
 decode()

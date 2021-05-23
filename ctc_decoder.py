@@ -17,8 +17,9 @@ For more details checkout either of these references:
 import numpy as np
 import math
 import collections
-from word_to_characters import lexicon_dic
+from utils.word_to_characters import lexicon_dic
 import arpa
+import re
 
 with open('mydata/data/local/lm/phones.txt','r') as f:
     alphabet = []
