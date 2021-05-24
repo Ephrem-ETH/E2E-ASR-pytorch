@@ -5,6 +5,7 @@ import os
 import time
 
 import editdistance
+import Levenshtein as Lev
 import kaldi_io
 import torch
 from torch.autograd import Variable
@@ -95,7 +96,7 @@ def decode():
         total_cer += cer; total_char += sen_len
         logging.info('[{}]: {}'.format(k, ' '.join(t)))
         logging.info('[{}]: {}\nlog-likelihood: {:.2f}\n'.format(k, ' '.join(y),nll))
-    logging.info('{} set {} CER {:.2f}%\t and WER {:.2f}%\n'.format(
+    logging.info('{} set {} CER {:.2f}% and WER {:.2f}%\n'.format(
         args.dataset.capitalize(), 'CTC' if args.ctc else 'Transducer', 100*total_cer/total_char,100*total_wer/total_word))
 
 decode()

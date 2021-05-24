@@ -49,7 +49,7 @@ def logsumexp(*args):
                        for a in args))
     return a_max + lsp
 
-def decode(probs, beam_size=10, blank=0, alpha=0.3):
+def decode(probs, beam_size=10, blank=0, alpha=0.7):
     """
     Performs inference for the given output probabilities.
 
@@ -112,27 +112,14 @@ def decode(probs, beam_size=10, blank=0, alpha=0.3):
                   n_p_nb = logsumexp(n_p_nb, p_b + p)
 
                 # *NB* this would be a good place to include an LM score.
-                # if alphabet[s]=='>':
-                #     last_word = "".join(n_prefix).split(">")[-2]
-                #     #print(last_word)
-                #     if last_word in list(lexicon_dict.keys()):
-                #       words = " ".join("".join(n_prefix).split(">")).strip()
-                #       print(words)
-                #       n_p_nb = logsumexp(lm.log_p(words),n_p_nb) 
-                #       print(n_p_nb)
-                if len(n_prefix) > 1 and alphabet[s] == '>':
+                if len(n_prefix) > 2 and alphabet[s] == '>':
                       last_word = "".join(n_prefix).split(">")[-2]   
                                 
-                      #print(last_word)
-                      if len(last_word) > 0  and last_word  in list(lexicon_dict.keys()):
+                      if len(last_word) > 3  and last_word  in list(lexicon_dict.keys()):
                         words = ("".join(n_prefix).replace(">"," ")).strip()
-                        #print(n_prefix)
-                        #print(words)
-                        lm_prob = lm.log_p(words)* alpha
-                        #print(lm_prob)
-                        n_p_nb = logsumexp(n_p_nb,lm_prob , p_nb + p, p_b + p) 
-                        #n_p_nb = logsumexp(n_p_nb, p_nb + p, p_b + p) 
-                        #print(n_p_nb)
+                        lm_prob = alpha * lm.log_p(words)
+                        n_p_nb = logsumexp(n_p_nb, lm_prob, p_nb + p, p_b + p) 
+                
                 next_beam[n_prefix] = (n_p_b, n_p_nb)
                 #print("n_p_b {0}, n_p_nb {1}".format(n_p_b,n_p_nb))
 
@@ -152,5 +139,4 @@ def decode(probs, beam_size=10, blank=0, alpha=0.3):
 
     best = beam[0]
     best_beam = "".join(best[0]).split(">")
-    print(best_beam)
     return tuple(best_beam[:-1]), -logsumexp(*best[1])

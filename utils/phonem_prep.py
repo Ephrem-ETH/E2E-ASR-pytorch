@@ -1,19 +1,12 @@
-""" phonemes = []
-with open("/home/emekonnen/kaldi/egs/librispeech/s5/data/local/lm/librispeech-lexicon.txt", "r") as f:
-    for line in f:
-        line = line.split()
-        for phn in line[1:]:
-            if phn not in phonemes:
-            phonemes.append(phn)
-   
-print()
-with open("phones.txt", "w") as fw:
-    for phone in phonemes:
-        fw.write(phone) """
+import argparse
+
+parser = argparse.ArgumentParser(description="retrieve unique phones or characters from the lexicon")
+parser.add_argument('--path', type=str, default='',help="path to the lexicon file")
+
+args = parser.parse_args()
 # function to prepare phonemes from the lexicon file
 def prepare_phones(file_path):
     phonemes = []
-    count =0
     with open(file_path, "r") as f:
         for line in f:
             line = line.split()
@@ -35,11 +28,11 @@ def prepare_phones(file_path):
         num = phone_dic[k]
         phones += key + " " + str(num) +"\n"
 
-    with open("/home/emekonnen/mydata/E2E-ASR/mydata/data/local/lm/words.txt","w") as fw:
+    with open(args.path + "/phones.txt","w") as fw:
         fw.write(phones)
 
 # call the function to get executed 
-prepare_phones("/home/emekonnen/mydata/E2E-ASR/mydata/data/local/lm/libri_lexicon.txt")
+prepare_phones(args.path + "/libri_lexicon.txt")
 
 
  
