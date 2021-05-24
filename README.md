@@ -3,7 +3,7 @@ This experiment is conducted on 100 hours of librispeech data for the task of E2
 
 Transforming transcription of both train and dev set from sequence of words to sequence of characters by adding additional character(">") at the end of each word of the transcription is required to train the CTC model on character level.  
 
-We used a beam search decoding strategy to decode the model output and return word transcription. 
+We used a prefix beam search decoding strategy to decode the model output and return word transcription. 
 
 
 
@@ -21,7 +21,7 @@ We used a beam search decoding strategy to decode the model output and return wo
 
 
 # Prepare Data
- * The following python programs  found in the above utils folder 
+ * The following python programs are found in the above utils folder 
 ### Step 1
 Prepare custom lexicon file that maps word to a sequence of characters
 ```
