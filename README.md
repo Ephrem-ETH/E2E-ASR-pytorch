@@ -10,7 +10,6 @@ We used a prefix beam search decoding strategy to decode the model output and re
 
 ## File description
 * model.py: rnnt joint model
-* model2012.py: graves2012 model
 * train_rnnt.py: rnnt training script
 * train_ctc.py: ctc acoustic model training script
 * eval.py: rnnt & ctc decode
