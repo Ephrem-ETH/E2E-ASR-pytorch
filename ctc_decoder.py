@@ -19,8 +19,7 @@ import math
 import collections
 from utils.word_to_characters import lexicon_dic
 import arpa
-import re
-
+from pynlpl.lm import lm
 with open('mydata/data/local/lm/phones.txt','r') as f:
     alphabet = []
     for char in f:
@@ -30,9 +29,19 @@ NEG_INF = -float("inf")
 lexicon_dict = lexicon_dic() 
 print("dict length : {}".format(len(lexicon_dict)))
 #load the language models
-lm_models = arpa.loadf("/home/emekonnen/mydata/E2E-ASR/mydata/data/local/lm/3-gram.pruned.3e-7.arpa")
+lm_models = arpa.loadf("/home/emekonnen/mydata/E2E-ASR-pytorch/mydata/data/local/lm/3-gram.pruned.3e-7.arpa")
+#lm_models = lm.ARPALanguageModel("/home/emekonnen/mydata/E2E-ASR-pytorch/mydata/data/local/lm/3-gram.arpa")
+
 lm = lm_models[0]
 
+def compute_probs(trigrams):
+  total_probs=0
+  for i,tri in enumerate(trigrams):
+    try:
+      total_probs += lm.log_p(" ".join(tri))
+    except KeyError:
+      pass
+  return total_probs
 
 def make_new_beam():
     fn = lambda : (NEG_INF, NEG_INF)
@@ -49,7 +58,7 @@ def logsumexp(*args):
                        for a in args))
     return a_max + lsp
 
-def decode(probs, beam_size=10, blank=0, alpha=0.7):
+def decode(probs, beam_size=10, blank=0, alpha= 0.001):
     """
     Performs inference for the given output probabilities.
 
@@ -112,14 +121,24 @@ def decode(probs, beam_size=10, blank=0, alpha=0.7):
                   n_p_nb = logsumexp(n_p_nb, p_b + p)
 
                 # *NB* this would be a good place to include an LM score.
-                if len(n_prefix) > 2 and alphabet[s] == '>':
+                if len(n_prefix) > 1 and alphabet[s] == '>':
                       last_word = "".join(n_prefix).split(">")[-2]   
                                 
-                      if len(last_word) > 3  and last_word  in list(lexicon_dict.keys()):
-                        words = ("".join(n_prefix).replace(">"," ")).strip()
-                        lm_prob = alpha * lm.log_p(words)
-                        n_p_nb = logsumexp(n_p_nb, lm_prob, p_nb + p, p_b + p) 
-                
+                      #print(last_word)
+                      if len(last_word) > 0  and last_word  in list(lexicon_dict.keys()):
+                        words = ("".join(n_prefix).replace(">"," ")).strip().split()
+                        #sentence = words.split()
+                        if len(words) >= 3:
+                            trigrams = [(words[i],words[i+1],words[i+2]) for i in range(len(words)-2)]
+                            #print(trigrams)
+                            #print(("".join(n_prefix).replace(">"," ")).strip())
+                            log_p = compute_probs(trigrams)
+                            #print(log_p)
+                            lm_prob = alpha * log_p                
+                         
+                            n_p_nb = logsumexp(n_p_nb,p_nb + p + lm_prob, p_b + p + lm_prob) 
+                        #n_p_nb = logsumexp(n_p_nb, p_nb + p, p_b + p) 
+                        #print(n_p_nb)
                 next_beam[n_prefix] = (n_p_b, n_p_nb)
                 #print("n_p_b {0}, n_p_nb {1}".format(n_p_b,n_p_nb))
 
@@ -139,4 +158,5 @@ def decode(probs, beam_size=10, blank=0, alpha=0.7):
 
     best = beam[0]
     best_beam = "".join(best[0]).split(">")
+    #print(best_beam)
     return tuple(best_beam[:-1]), -logsumexp(*best[1])
